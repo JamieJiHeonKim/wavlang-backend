@@ -14,11 +14,10 @@ const passport = require("passport");
 const OAuth2Strategy = require("passport-google-oauth2").Strategy;
 const userdb = require('./models/UserModel');
 const verificationTokendb = require('./models/VerificationToken');
-const stripeRoutes = require("./routes/StripeRoutes");
 
 require('dotenv').config()
 
-const apiKey = process.env.REACT_APP_ASSEMBLY_API_KEY;
+const apiKey = process.env.ASSEMBLY_API_KEY;
 const baseUrl = 'https://api.assemblyai.com/v2';
 const googleOAuthCliendId = process.env.GOOGLE_CLIENT_ID;
 const googleOAuthClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -32,7 +31,25 @@ const headers = {
 
 const app = express();
 
-app.use(cors());
+// CORS configuration for production
+const allowedOrigins = process.env.FRONTEND_URL 
+    ? process.env.FRONTEND_URL.split(',') 
+    : ['http://localhost:3000'];
+
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(fileUpload());
 
@@ -63,7 +80,6 @@ app.get('/', (req, res) => {
 // });
 
 app.use('/api', userRoutes);
-app.use('/api/stripe', stripeRoutes);
 app.use((req, res, next) => {
     console.log(req.path, req.method);
     next();
@@ -205,7 +221,7 @@ app.post('/api/transcribe_file', upload.single('file'), async (req, res) => {
         const config = {
             headers: {
                 "Content-Type": `multipart/form-data; charset=UTF-8; boundary=${formData._boundary}`,
-                "Authorization": `Bearer ${process.env.REACT_APP_API_KEY}`,
+                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
             },
         };
 
@@ -257,7 +273,7 @@ app.post('/api/transcribe_whisperai', async (req, res) => {
             .post(whisper_url, req.files.file, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    Authorization: `Bearer ${process.env.REACT_APP_API_KEY}`,
+                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
                 },
             })
             .then((res) => {
@@ -283,7 +299,7 @@ app.post('/api/auth/google', async (req, res) => {
     const { code } = req.body;
     const client_id = googleOAuthCliendId;
     const client_secret = googleOAuthClientSecret;
-    const redirect_url = 'http://localhost:3000';
+    const redirect_url = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000';
     const grant_type = 'authorization_code';
 
     fetch('<https://oauth2.googleapis.com/token>', {

@@ -1,4 +1,12 @@
 {
+  "name": "wavlang-backend",
+  "version": "1.0.0",
+  "description": "Wavlang Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
@@ -25,7 +33,9 @@
     "path": "^0.12.7",
     "react-passport": "^1.1.0",
     "stream": "^0.0.2",
-    "stripe": "^14.24.0",
     "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
