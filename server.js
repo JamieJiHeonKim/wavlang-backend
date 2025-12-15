@@ -31,19 +31,26 @@ const headers = {
 
 const app = express();
 
-// CORS configuration for production
 const allowedOrigins = process.env.FRONTEND_URL 
-    ? process.env.FRONTEND_URL.split(',') 
-    : ['http://localhost:3000'];
+    ? process.env.FRONTEND_URL.split(',').map(url => url.trim()) 
+    : [
+        'http://localhost:3000',
+        'https://wavlang-frontend-production.up.railway.app'
+    ];
+
+console.log('CORS Allowed Origins:', allowedOrigins);
 
 app.use(cors({
     origin: function(origin, callback) {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true);
+        console.log('Request from origin:', origin);
+                if (!origin) return callback(null, true);
         
         if (allowedOrigins.indexOf(origin) !== -1) {
+            console.log('✅ Origin allowed');
             callback(null, true);
         } else {
+            console.log('Origin blocked:', origin);
+            console.log('Allowed origins:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -58,11 +65,6 @@ const bufferToStream = (buffer) => {
     return Readable.from(buffer);
 }
 
-/**
- * Convert a time string of the format 'mm:ss' into seconds.
- * @param {string} timeString - A time string in the format 'mm:ss'.
- * @return {number} - The time in seconds.
- */
 const parseTimeStringToSeconds = timeString => {
     const [minutes, seconds] = timeString.split(':').map(tm => parseInt(tm));
     return minutes * 60 + seconds;
