@@ -2,6 +2,8 @@
 
 RESTful API server for WavLang - an intelligent audio transcription and analysis platform. Handles authentication, file processing, AI transcription, and data persistence.
 
+**WavLang URL:** [wavlang-url](https://wavlang-frontend-production.up.railway.app/)
+
 **Frontend Repository:** [wavlang-frontend](https://github.com/JamieJiHeonKim/wavlang-frontend)
 
 ---
